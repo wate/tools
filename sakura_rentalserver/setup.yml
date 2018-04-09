@@ -109,7 +109,7 @@
         path: "~/www/.htaccess"
         block: "{{ wordpress.htaccess }}"
         create: yes
-    - name: Enabled wp-multibyte-patch
+    - name: Enabled WP Multibyte Patch plugin
       command: ~/bin/wp plugin activate wp-multibyte-patch
       args:
         chdir: ~/www
