@@ -1,5 +1,8 @@
+## 利用するPHPのバージョン
 php_version: default
-php_use_imageck: no
+## Imagickモジュールを利用するか否か
+php_use_imageck: yes
+## php.iniの設定
 php_ini:
   default_charset: UTF-8
   internal_encoding: ""
@@ -10,31 +13,34 @@ php_ini:
   upload_max_filesize: 2M
   max_file_uploads: 20
   date.timezone: Asia/Tokyo
-  session.name: PHPSESSID
-  session.gc_maxlifetime: 1440
   mbstring.language: Japanese
   mbstring.detect_order: auto
 
 wordpress:
-  version: latest
-  locale: ja
+  ## ダウンロードするWordPressの設定
+  # version: latest
+  # locale: ja
+  ## インストールの設定
   url: "{{ ansible_user }}.sakura.ne.jp"
-  title: Example
+  title: テストサイト
   admin_user: supervisor
   admin_password: str0ngp@55w0rd
   admin_email: info@example.com
-  db_host: mysqXXX.db.sakura.ne.jp
-  db_name: db_name
-  db_user: db_user
-  db_password: db_P@ssw00rd
+  ## データベースの設定
+  db_host: mysqlXXX.db.sakura.ne.jp
+  db_name: "{{ ansible_user }}_wordpress"
+  db_user: "{{ ansible_user }}"
+  db_password: vErY_VeRy_Str0ng_P@55w0rd
   db_prefix: wp_
   db_charset: utf8mb4
+  ## パーマリンクの設定
   rewrite_structure: /%category%/%postname%/
   extra_setting: |
     define('WP_DEBUG', false);
     define('WP_DEBUG_DISPLAY', false);
     define('WP_POST_REVISIONS', false);
     define('DISALLOW_FILE_EDIT', true);
+  ## アクセスコントロールファイルの設定
   htaccess: |
     <IfModule mod_rewrite.c>
     RewriteEngine On
@@ -44,14 +50,40 @@ wordpress:
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule . /index.php [L]
     </IfModule>
-  # import:
-  #   file: https://raw.githubusercontent.com/jawordpressorg/theme-test-data-ja/master/wordpress-theme-test-date-ja.xml
-  #   authors: create
-  plugins: []
+  ## インストールするプラグインの設定
+  plugins:
+    # Autoptimizeプラグイン
+    - name: autoptimize
+      activate: yes
+    # Disable Google Fontsプラグイン
+    - name: disable-google-fonts
+      activate: yes
+    # ImageMagick Engineプラグイン
+    - name: imagemagick-engine
+      activate: yes
+    # Remove query strings from resourcesプラグイン
+    - name: remove-query-strings-from-static-resources
+      activate: yes
+    # Protect Uploadsプラグイン
+    - name: protect-uploads
+      activate: yes
+    # All In One WP Security & Firewallプラグイン
+    - name: all-in-one-wp-security-and-firewall
+      activate: yes
+    # TypeSquare Webfonts SAKURA for SAKURA Rental Serverプラグイン
+    - name: ts-webfonts-for-sakura
+      activate: yes
+    # さくらのレンタルサーバ 簡単SSL化プラグイン
+    - name: sakura-rs-wp-ssl
     # - name: some-plugin-name
     #   activate: yes (optional)
     #   version: 1.2.3 (optional)
+  ## インストールするテーマの設定
   themes: []
     # - name: some-theme-name
     #   version: 1.2.3 (optional)
     #   active: yes (optional)
+  ## インポートするデータの設定
+  # import:
+  #   file: https://raw.githubusercontent.com/jawordpressorg/theme-test-data-ja/master/wordpress-theme-test-date-ja.xml
+  #   authors: create

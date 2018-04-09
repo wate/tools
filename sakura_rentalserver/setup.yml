@@ -3,16 +3,16 @@
   become: no
   gather_facts: no
   tasks:
-    - name: load setting file
+    - name: Load setting file
       include_vars: config.yml
-    - name: create directory
+    - name: Create user directory
       file:
         path: "~/{{ item }}"
         state: directory
       with_items:
         - bin
         - tmp
-    - name: set php version
+    - name: Set php version
       copy:
         content: "{{ php_version if php_version != 'default' else '' }}"
         dest: ~/.php.version
@@ -24,7 +24,7 @@
         value: imagick.so
         state: "{{ 'present' if php_use_imageck else 'absent' }}"
         create: yes
-    - name: php setting
+    - name: Set php setting
       ini_file:
         path: ~/www/php.ini
         section: "{{ item.key.split('.')[0] if item.key.split('.')[1] is defined else 'core' }}"
@@ -32,3 +32,128 @@
         value: "{{ item.value }}"
         create: yes
       with_dict: "{{ php_ini }}"
+    - name: Install wp-cli
+      get_url:
+        url: https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+        dest: ~/bin/wp
+        mode: 0700
+    - name: Create wp-cli user config directory
+      file:
+        path: ~/.wp-cli
+        state: directory
+    - name: Set wp-cli config variable
+      set_fact:
+        wp_cli_cfg:
+          path: "/home/{{ sakura_user }}/www"
+          core download:
+            locale: "{{ wordpress.locale|default('ja') }}"
+            version: "{{ wordpress.version|default('latest') }}"
+          config create:
+            dbhost: "{{ wordpress.db_host }}"
+            dbname: "{{ wordpress.db_name }}"
+            dbuser: "{{ wordpress.db_user }}"
+            dbpass: "{{ wordpress.db_password }}"
+            dbcharset: "{{ wordpress.db_charset|default('utf8mb4') }}"
+          core install:
+              url: "{{ wordpress.url }}"
+              title: "{{ wordpress.title }}"
+              admin_user: "{{ wordpress.admin_user }}"
+              admin_password: "{{ wordpress.admin_password }}"
+              admin_email: "{{ wordpress.admin_email }}"
+    - name: Create wp-cli setting file
+      blockinfile:
+        path: ~/.wp-cli/config.yml
+        block: "{{ wp_cli_cfg | to_nice_yaml }}"
+        create: yes
+    - name: Download WordPress
+      command: ~/bin/wp core download
+      args:
+        creates: "~/www/wp-config-sample.php"
+    - name: Create WordPress config file
+      command: ~/bin/wp config create
+      args:
+        creates: ~/www/wp-config.php
+    - name: Check WordPress is installed
+      shell: ~/bin/wp core is-installed &> /dev/null
+      ignore_errors: yes
+      changed_when: no
+      register: result
+    - name: Install WordPress
+      command: ~/bin/wp core install
+      when: result.rc > 0
+    - name: Add WordPress extra config
+      blockinfile:
+        marker: "// {mark} ANSIBLE MANAGED BLOCK"
+        path: "~/www/wp-config.php"
+        insertafter: "\\$table_prefix ="
+        block: "{{ wordpress.extra_setting }}"
+    - name: Set WordPress rewrite rules
+      block:
+        - name: update permalink structure
+          command: ~/bin/wp rewrite structure '{{ wordpress.rewrite_structure }}'
+        - name: flush rewrite rules
+          command: ~/bin/wp rewrite flush
+      when: wordpress.rewrite_structure is defined
+    - name: Create .htaccess
+      blockinfile:
+        path: "~/www/.htaccess"
+        block: "{{ wordpress.htaccess }}"
+        create: yes
+    - name: Enabled wp-multibyte-patch
+      command: ~/bin/wp plugin activate wp-multibyte-patch
+      args:
+        removes: "~/www/wp-content/plugins/wp-multibyte-patch"
+    - name: Install WordPress plugins
+      command: ~/bin/wp plugin install {{ item.name }} {{ '--activate' if item.activate|default(false) else '' }} {{ '--version=' + item.version if item.version|default(None) else '' }}
+      args:
+        creates: "~/www/wp-content/plugins/{{ item.name }}"
+    - name: Install WordPress themes
+      command: ~/bin/wp theme install {{ item.name }} {{ '--activate' if item.activate|default(false) else '' }} {{ '--version=' + item.version if item.version|default(None) else '' }}
+      args:
+        creates: "{{ apache_vhosts[0].document_root }}/wp-content/themes/{{ item.name }}"
+      with_items: "{{ wordpress.themes }}"
+    - name: import WordPress data
+      block:
+        - name: install wordpress-importer plugin
+          command: ~/bin/wp plugin install wordpress-importer --activate
+        - name: download import data
+          get_url:
+            url: "{{ wordpress.import.file }}"
+            dest: ~/tmp/worepress_import_data.xml
+          when: wordpress.import.file.startswith('http://') or wordpress.import.file.startswith('https://')
+        - name: upload import data
+          copy:
+            src: "{{ wordpress.import.file }}"
+            dest: ~/tmp/worepress_import_data.xml
+          when: not wordpress.import.file.startswith('http://') and not wordpress.import.file.startswith('https://')
+        - name: upload user mapping file
+          copy:
+            src: "{{ wordpress.import.file }}"
+            dest: ~/tmp/worepress_user_mapping.csv
+          when: not wordpress.import.authors in ['create', 'skip']
+        - name: Import data
+          command: ~/bin/wp import ~/tmp/worepress_import_data.xml --authors={{ wordpress.import.authors if wordpress.import.authors in ['create', 'skip'] else '~/tmp/worepress_user_mapping.csv'  }}
+      when: wordpress.import is defined
+    - name: Change permission for uploads directory
+      file:
+        path: ~/www/wp-content/uploads
+        state: directory
+        recurse: yes
+        mode: "0707"
+    - name: create mysql connection setting file
+      ini_file:
+        path: ~/.my.cnf
+        section: client
+        option: "{{ item.option }}"
+        value: "{{ item.value }}"
+        mode: "0600"
+        create: yes
+      with_items:
+        - option: host
+          value: "{{ wordpress.db_host }}"
+        - option: name
+          value: "{{ wordpress.db_name }}"
+        - option: user
+          value: "{{ wordpress.db_user }}"
+        - option: password
+          value: "{{ wordpress.db_password }}"
