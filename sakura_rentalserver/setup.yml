@@ -1,0 +1,34 @@
+- name: Sakura Rental Server WordPress Setup tool
+  hosts: sakura_rental_servers
+  become: no
+  gather_facts: no
+  tasks:
+    - name: load setting file
+      include_vars: config.yml
+    - name: create directory
+      file:
+        path: "~/{{ item }}"
+        state: directory
+      with_items:
+        - bin
+        - tmp
+    - name: set php version
+      copy:
+        content: "{{ php_version if php_version != 'default' else '' }}"
+        dest: ~/.php.version
+    - name: enable/disable imagick module
+      ini_file:
+        path: ~/www/php.ini
+        section: core
+        option: extension
+        value: imagick.so
+        state: "{{ 'present' if php_use_imageck else 'absent' }}"
+        create: yes
+    - name: php setting
+      ini_file:
+        path: ~/www/php.ini
+        section: "{{ item.key.split('.')[0] if item.key.split('.')[1] is defined else 'core' }}"
+        option: "{{ item.key }}"
+        value: "{{ item.value }}"
+        create: yes
+      with_dict: "{{ php_ini }}"

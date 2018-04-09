@@ -1,0 +1,57 @@
+php_version: default
+php_use_imageck: no
+php_ini:
+  default_charset: UTF-8
+  internal_encoding: ""
+  input_encoding: ""
+  output_encoding: ""
+  post_max_size: 8M
+  max_input_vars: 1000
+  upload_max_filesize: 2M
+  max_file_uploads: 20
+  date.timezone: Asia/Tokyo
+  session.name: PHPSESSID
+  session.gc_maxlifetime: 1440
+  mbstring.language: Japanese
+  mbstring.detect_order: auto
+
+wordpress:
+  version: latest
+  locale: ja
+  url: "{{ ansible_user }}.sakura.ne.jp"
+  title: Example
+  admin_user: supervisor
+  admin_password: str0ngp@55w0rd
+  admin_email: info@example.com
+  db_host: mysqXXX.db.sakura.ne.jp
+  db_name: db_name
+  db_user: db_user
+  db_password: db_P@ssw00rd
+  db_prefix: wp_
+  db_charset: utf8mb4
+  rewrite_structure: /%category%/%postname%/
+  extra_setting: |
+    define('WP_DEBUG', false);
+    define('WP_DEBUG_DISPLAY', false);
+    define('WP_POST_REVISIONS', false);
+    define('DISALLOW_FILE_EDIT', true);
+  htaccess: |
+    <IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+    RewriteRule ^index\.php$ - [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . /index.php [L]
+    </IfModule>
+  # import:
+  #   file: https://raw.githubusercontent.com/jawordpressorg/theme-test-data-ja/master/wordpress-theme-test-date-ja.xml
+  #   authors: create
+  plugins: []
+    # - name: some-plugin-name
+    #   activate: yes (optional)
+    #   version: 1.2.3 (optional)
+  themes: []
+    # - name: some-theme-name
+    #   version: 1.2.3 (optional)
+    #   active: yes (optional)
