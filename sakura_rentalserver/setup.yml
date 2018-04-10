@@ -5,6 +5,12 @@
   tasks:
     - name: Load setting file
       include_vars: config.yml
+    - name: Set authorized key
+      authorized_key:
+        user: "{{ ansible_user }}"
+        key: "{{ item.key }}"
+        state: "{{ 'present' if item.state|default(true) else 'absent' }}"
+      with_items: "{{ authorized_keys }}"
     - name: Create user directory
       file:
         path: "~/{{ item }}"

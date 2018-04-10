@@ -87,3 +87,11 @@ wordpress:
   # import:
   #   file: https://raw.githubusercontent.com/jawordpressorg/theme-test-data-ja/master/wordpress-theme-test-date-ja.xml
   #   authors: create
+
+## SSH用公開鍵の設定
+authorized_keys:
+  - key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+  # - key: "{{ lookup('file', '~/.ssh/user1.pub') }}"
+  #   state: yes (optional)
+  # - key: "{{ lookup('file', '~/.ssh/removed.pub') }}"
+  #   state: no (optional)
