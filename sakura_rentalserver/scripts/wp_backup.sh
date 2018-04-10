@@ -10,8 +10,8 @@ fi
 
 cd ${BACKUP_DIR} || exit 1;
 {% if usacloud.install -%}
-export SACLOUD_OJS_ACCESS_KEY_ID="{{ usacloud.ojs_access_key_id }}"
-export SACLOUD_OJS_SECRET_ACCESS_KEY="{{ usacloud.ojs_secret_access_key }}"
+export SACLOUD_OJS_ACCESS_KEY_ID="{{ usacloud.ojs_access_key_id|default('', true) }}"
+export SACLOUD_OJS_SECRET_ACCESS_KEY="{{ usacloud.ojs_secret_access_key|default('', true) }}"
 if [ -n "${SACLOUD_OJS_ACCESS_KEY_ID}" ] && [ -n "${SACLOUD_OJS_SECRET_ACCESS_KEY}" ] ; then
     echo "# ---------------------------"
     echo "# Backup old backup files(Server => Object Strage)"
