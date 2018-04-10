@@ -20,6 +20,7 @@
       with_items:
         - bin
         - tmp
+        - backup
       tags: always
     - block:
         - name: Cleanup usacloud files
@@ -94,7 +95,7 @@
           get_url:
             url: https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
             dest: ~/bin/wp
-            mode: 0700
+            mode: "0700"
         - name: Create wp-cli user config directory
           file:
             path: ~/.wp-cli
@@ -216,6 +217,27 @@
             state: directory
             recurse: yes
             mode: "0707"
+        - name: add cron job files
+          template:
+            src: "{{ item }}"
+            dest: "~/bin/{{ item | basename }}"
+            mode: "0700"
+          with_fileglob:
+            - "{{ playbook_dir }}/scripts/*.sh"
+        - name: Set WordPress backup job
+          cron:
+            name: "WordPress backup job"
+            job: ~/bin/wp_backup.sh
+            hour: "{{ wordpress_backup_job.hour }}"
+            minute: "{{ wordpress_backup_job.minute }}"
+            state: "{{ 'present' if wordpress_backup_job.enabled else 'absent' }}"
+        - name: Set WordPress update job
+          cron:
+            name: "WordPress update job"
+            job: ~/bin/wp_update.sh
+            hour: "{{ wordpress_update_job.hour }}"
+            minute: "{{ wordpress_update_job.minute }}"
+            state: "{{ 'present' if wordpress_update_job.enabled else 'absent' }}"
       tags: wordpress
     - name: Create MySQL connection setting file
       ini_file:
