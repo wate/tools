@@ -13,7 +13,7 @@
         state: "{{ 'present' if item.state|default(true) else 'absent' }}"
       with_items: "{{ authorized_keys }}"
       tags: authorized_key
-    - name: Create user directory
+    - name: Create user directories
       file:
         path: "~/{{ item }}"
         state: directory
@@ -30,31 +30,31 @@
             - ~/bin/usacloud
             - ~/tmp/usacloud_freebsd-amd64.zip
         - block:
-          - name: Dowload usacloud
-            command: wget https://github.com/sacloud/usacloud/releases/download/v{{ usacloud.version }}/usacloud_freebsd-amd64.zip -O usacloud_freebsd-amd64.zip
-            args:
-              chdir: ~/tmp
-              warn: no
-          - name: Install usacloud
-            unarchive:
-              src: ~/tmp/usacloud_freebsd-amd64.zip
-              dest: ~/bin
-              remote_src: yes
-          - name: Create usacloud default Setting file directory
-            file:
-              path: ~/.usacloud/default
-              state: directory
-          - name: Set usacloud default setting variable
-            set_fact:
-              usacloud_default_config:
-                AccessToken: "{{ usacloud.token }}"
-                AccessTokenSecret: "{{ usacloud.secret }}"
-                Zone: "{{ usacloud.zone }}"
-                DefaultOutputType: "{{ usacloud.output_type }}"
-          - name: Create usacloud default setting file
-            copy:
-              content: "{{ usacloud_default_config | to_nice_json }}"
-              dest: ~/.usacloud/default/config.json
+            - name: Dowload usacloud
+              command: wget https://github.com/sacloud/usacloud/releases/download/v{{ usacloud.version }}/usacloud_freebsd-amd64.zip -O usacloud_freebsd-amd64.zip
+              args:
+                chdir: ~/tmp
+                warn: no
+            - name: Install usacloud
+              unarchive:
+                src: ~/tmp/usacloud_freebsd-amd64.zip
+                dest: ~/bin
+                remote_src: yes
+            - name: Create usacloud default Setting file directory
+              file:
+                path: ~/.usacloud/default
+                state: directory
+            - name: Set usacloud default setting variable
+              set_fact:
+                usacloud_default_config:
+                  AccessToken: "{{ usacloud.token }}"
+                  AccessTokenSecret: "{{ usacloud.secret }}"
+                  Zone: "{{ usacloud.zone }}"
+                  DefaultOutputType: "{{ usacloud.output_type }}"
+            - name: Create usacloud default setting file
+              copy:
+                content: "{{ usacloud_default_config | to_nice_json }}"
+                dest: ~/.usacloud/default/config.json
           when: usacloud.install
       tags: usacloud
     - block:
@@ -143,11 +143,11 @@
             block: "{{ wordpress.extra_setting }}"
         - name: Set WordPress rewrite rules
           block:
-            - name: update permalink structure
+            - name: Update permalink structure
               command: ~/bin/wp rewrite structure '{{ wordpress.rewrite_structure }}'
               args:
                 chdir: ~/www
-            - name: flush rewrite rules
+            - name: Flush rewrite rules
               command: ~/bin/wp rewrite flush
               args:
                 chdir: ~/www
