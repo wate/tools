@@ -97,13 +97,19 @@ authorized_keys:
   #   state: no (optional)
 
 usacloud:
+  # usacloudをインストールするか否か
   install: yes
+  # usacloudのバージョン
   version: "0.11.0"
-  # Setting SakuraCloud API Token
+  # さくらのクラウド APIキー(アクセストークン)
   token: "{{ lookup('env', 'SAKURACLOUD_ACCESS_TOKEN') }}"
-  # Setting SakuraCloud API Secret
+  # さくらのクラウド APIキー(アクセストークンシークレット)
   secret: "{{ lookup('env', 'SAKURACLOUD_ACCESS_TOKEN_SECRET') }}"
-  # Setting SakuraCloud Zone: is1a / is1b / tk1a / tk1v
+  # ゾーン: is1a / is1b / tk1a / tk1v
   zone: "{{ lookup('env', 'SAKURACLOUD_ZONE') }}"
-  # Setting Default Output Type: table / json / csv / tsv
+  # デフォルトの出力形式: table / json / csv / tsv
   output_type: table
+  # オブジェクトストレージ アクセスキー(アクセスキーID)
+  ojs_access_key_id: "{{ lookup('env', 'SACLOUD_OJS_ACCESS_KEY_ID') }}"
+  # オブジェクトストレージ アクセスキー(シークレットアクセスキー)
+  ojs_secret_access_key: "{{ lookup('env', 'SACLOUD_OJS_SECRET_ACCESS_KEY') }}"
