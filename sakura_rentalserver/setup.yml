@@ -5,12 +5,14 @@
   tasks:
     - name: Load setting file
       include_vars: config.yml
+      tags: always
     - name: Set authorized key
       authorized_key:
         user: "{{ ansible_user }}"
         key: "{{ item.key }}"
         state: "{{ 'present' if item.state|default(true) else 'absent' }}"
       with_items: "{{ authorized_keys }}"
+      tags: authorized_key
     - name: Create user directory
       file:
         path: "~/{{ item }}"
@@ -18,152 +20,193 @@
       with_items:
         - bin
         - tmp
-    - name: Set php version
-      copy:
-        content: "{{ php_version if php_version != 'default' else '' }}"
-        dest: ~/.php.version
-    - name: Enable or disable imagick module
-      ini_file:
-        path: ~/www/php.ini
-        section: core
-        option: extension
-        value: imagick.so
-        state: "{{ 'present' if php_use_imageck else 'absent' }}"
-        create: yes
-    - name: Set php setting
-      ini_file:
-        path: ~/www/php.ini
-        section: "{{ item.key.split('.')[0] if item.key.split('.')[1] is defined else 'core' }}"
-        option: "{{ item.key }}"
-        value: "{{ item.value }}"
-        create: yes
-      with_dict: "{{ php_ini }}"
-    - name: Install wp-cli
-      get_url:
-        url: https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-        dest: ~/bin/wp
-        mode: 0700
-    - name: Create wp-cli user config directory
-      file:
-        path: ~/.wp-cli
-        state: directory
-    - name: Set wp-cli config variable
-      set_fact:
-        wp_cli_cfg:
-          path: "/home/{{ ansible_user }}/www"
-          "core download":
-            locale: "{{ wordpress.locale|default('ja') }}"
-            version: "{{ wordpress.version|default('latest') }}"
-          "config create":
-            dbhost: "{{ wordpress.db_host }}"
-            dbname: "{{ wordpress.db_name }}"
-            dbuser: "{{ wordpress.db_user }}"
-            dbpass: "{{ wordpress.db_password }}"
-            dbcharset: "{{ wordpress.db_charset|default('utf8mb4') }}"
-          "core install":
-              url: "{{ wordpress.url }}"
-              title: "{{ wordpress.title }}"
-              admin_user: "{{ wordpress.admin_user }}"
-              admin_password: "{{ wordpress.admin_password }}"
-              admin_email: "{{ wordpress.admin_email }}"
-    - name: Create wp-cli setting file
-      blockinfile:
-        path: ~/.wp-cli/config.yml
-        block: "{{ wp_cli_cfg | to_nice_yaml }}"
-        create: yes
-    - name: Download WordPress
-      command: ~/bin/wp core download
-      args:
-        chdir: ~/www
-        creates: "~/www/wp-config-sample.php"
-    - name: Create WordPress config file
-      command: ~/bin/wp config create
-      args:
-        chdir: ~/www
-        creates: ~/www/wp-config.php
-    - name: Check WordPress is installed
-      command: ~/bin/wp core is-installed
-      args:
-        chdir: ~/www
-      ignore_errors: yes
-      changed_when: no
-      register: result
-    - name: Install WordPress
-      command: ~/bin/wp core install
-      args:
-        chdir: ~/www
-      when: result.rc > 0
-    - name: Add WordPress extra config
-      blockinfile:
-        marker: "// {mark} ANSIBLE MANAGED BLOCK"
-        path: "~/www/wp-config.php"
-        insertafter: "\\$table_prefix ="
-        block: "{{ wordpress.extra_setting }}"
-    - name: Set WordPress rewrite rules
-      block:
-        - name: update permalink structure
-          command: ~/bin/wp rewrite structure '{{ wordpress.rewrite_structure }}'
-          args:
-            chdir: ~/www
-        - name: flush rewrite rules
-          command: ~/bin/wp rewrite flush
-          args:
-            chdir: ~/www
-      when: wordpress.rewrite_structure is defined
-    - name: Create .htaccess
-      blockinfile:
-        path: "~/www/.htaccess"
-        block: "{{ wordpress.htaccess }}"
-        create: yes
-    - name: Enabled WP Multibyte Patch plugin
-      command: ~/bin/wp plugin activate wp-multibyte-patch
-      args:
-        chdir: ~/www
-        removes: "~/www/wp-content/plugins/wp-multibyte-patch"
-    - name: Install WordPress plugins
-      command: ~/bin/wp plugin install {{ item.name }} {{ '--activate' if item.activate|default(false) else '' }} {{ '--version=' + item.version if item.version|default(None) else '' }}
-      args:
-        chdir: ~/www
-        creates: "~/www/wp-content/plugins/{{ item.name }}"
-      with_items: "{{ wordpress.plugins }}"
-    - name: Install WordPress themes
-      command: ~/bin/wp theme install {{ item.name }} {{ '--activate' if item.activate|default(false) else '' }} {{ '--version=' + item.version if item.version|default(None) else '' }}
-      args:
-        chdir: ~/www
-        creates: "{{ apache_vhosts[0].document_root }}/wp-content/themes/{{ item.name }}"
-      with_items: "{{ wordpress.themes }}"
-    - name: Import WordPress data
-      block:
-        - name: Install wordpress-importer plugin
-          command: ~/bin/wp plugin install wordpress-importer --activate
-          args:
-            chdir: ~/www
-        - name: Download import data
+      tags: always
+    - block:
+        - name: Cleanup usacloud files
+          file:
+            path: "{{ item }}"
+            state: absent
+          with_items:
+            - ~/bin/usacloud
+            - ~/tmp/usacloud_freebsd-amd64.zip
+        - block:
+          - name: Dowload usacloud
+            command: wget https://github.com/sacloud/usacloud/releases/download/v{{ usacloud.version }}/usacloud_freebsd-amd64.zip -O usacloud_freebsd-amd64.zip
+            args:
+              chdir: ~/tmp
+              warn: no
+          - name: Install usacloud
+            unarchive:
+              src: ~/tmp/usacloud_freebsd-amd64.zip
+              dest: ~/bin
+              remote_src: yes
+          - name: Create usacloud default Setting file directory
+            file:
+              path: ~/.usacloud/default
+              state: directory
+          - name: Set usacloud default setting variable
+            set_fact:
+              usacloud_default_config:
+                AccessToken: "{{ usacloud.token }}"
+                AccessTokenSecret: "{{ usacloud.secret }}"
+                Zone: "{{ usacloud.zone }}"
+                DefaultOutputType: "{{ usacloud.output_type }}"
+          - name: Create usacloud default setting file
+            copy:
+              content: "{{ usacloud_default_config | to_nice_json }}"
+              dest: ~/.usacloud/default/config.json
+          when: usacloud.install
+      tags: usacloud
+    - block:
+        - name: Set PHP version
+          copy:
+            content: "{{ php_version if php_version != 'default' else '' }}"
+            dest: ~/.php.version
+        - name: Enable or disable PHP imagick module
+          ini_file:
+            path: ~/www/php.ini
+            section: core
+            option: extension
+            value: imagick.so
+            state: "{{ 'present' if php_use_imageck else 'absent' }}"
+            create: yes
+        - name: Set PHP setting
+          ini_file:
+            path: ~/www/php.ini
+            section: "{{ item.key.split('.')[0] if item.key.split('.')[1] is defined else 'core' }}"
+            option: "{{ item.key }}"
+            value: "{{ item.value }}"
+            create: yes
+          with_dict: "{{ php_ini }}"
+      tags: php
+    - block:
+        - name: Install wp-cli
           get_url:
-            url: "{{ wordpress.import.file }}"
-            dest: ~/tmp/worepress_import_data.xml
-          when: wordpress.import.file.startswith('http://') or wordpress.import.file.startswith('https://')
-        - name: Upload import data
-          copy:
-            src: "{{ wordpress.import.file }}"
-            dest: ~/tmp/worepress_import_data.xml
-          when: not wordpress.import.file.startswith('http://') and not wordpress.import.file.startswith('https://')
-        - name: Upload user mapping file
-          copy:
-            src: "{{ wordpress.import.file }}"
-            dest: ~/tmp/worepress_user_mapping.csv
-          when: not wordpress.import.authors in ['create', 'skip']
-        - name: Import data
-          command: ~/bin/wp import ~/tmp/worepress_import_data.xml --authors={{ wordpress.import.authors if wordpress.import.authors in ['create', 'skip'] else '~/tmp/worepress_user_mapping.csv'  }}
+            url: https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+            dest: ~/bin/wp
+            mode: 0700
+        - name: Create wp-cli user config directory
+          file:
+            path: ~/.wp-cli
+            state: directory
+        - name: Set wp-cli config variable
+          set_fact:
+            wp_cli_cfg:
+              path: "/home/{{ ansible_user }}/www"
+              "core download":
+                locale: "{{ wordpress.locale|default('ja') }}"
+                version: "{{ wordpress.version|default('latest') }}"
+              "config create":
+                dbhost: "{{ wordpress.db_host }}"
+                dbname: "{{ wordpress.db_name }}"
+                dbuser: "{{ wordpress.db_user }}"
+                dbpass: "{{ wordpress.db_password }}"
+                dbcharset: "{{ wordpress.db_charset|default('utf8mb4') }}"
+              "core install":
+                  url: "{{ wordpress.url }}"
+                  title: "{{ wordpress.title }}"
+                  admin_user: "{{ wordpress.admin_user }}"
+                  admin_password: "{{ wordpress.admin_password }}"
+                  admin_email: "{{ wordpress.admin_email }}"
+        - name: Create wp-cli setting file
+          blockinfile:
+            path: ~/.wp-cli/config.yml
+            block: "{{ wp_cli_cfg | to_nice_yaml }}"
+            create: yes
+        - name: Download WordPress
+          command: ~/bin/wp core download
           args:
             chdir: ~/www
-      when: wordpress.import is defined
-    - name: Change permission for uploads directory
-      file:
-        path: ~/www/wp-content/uploads
-        state: directory
-        recurse: yes
-        mode: "0707"
+            creates: "~/www/wp-config-sample.php"
+        - name: Create WordPress config file
+          command: ~/bin/wp config create
+          args:
+            chdir: ~/www
+            creates: ~/www/wp-config.php
+        - name: Check WordPress is installed
+          command: ~/bin/wp core is-installed
+          args:
+            chdir: ~/www
+          ignore_errors: yes
+          changed_when: no
+          register: result
+        - name: Install WordPress
+          command: ~/bin/wp core install
+          args:
+            chdir: ~/www
+          when: result.rc > 0
+        - name: Add WordPress extra config
+          blockinfile:
+            marker: "// {mark} ANSIBLE MANAGED BLOCK"
+            path: "~/www/wp-config.php"
+            insertafter: "\\$table_prefix ="
+            block: "{{ wordpress.extra_setting }}"
+        - name: Set WordPress rewrite rules
+          block:
+            - name: update permalink structure
+              command: ~/bin/wp rewrite structure '{{ wordpress.rewrite_structure }}'
+              args:
+                chdir: ~/www
+            - name: flush rewrite rules
+              command: ~/bin/wp rewrite flush
+              args:
+                chdir: ~/www
+          when: wordpress.rewrite_structure is defined
+        - name: Create .htaccess
+          blockinfile:
+            path: "~/www/.htaccess"
+            block: "{{ wordpress.htaccess }}"
+            create: yes
+        - name: Enabled WP Multibyte Patch plugin
+          command: ~/bin/wp plugin activate wp-multibyte-patch
+          args:
+            chdir: ~/www
+            removes: "~/www/wp-content/plugins/wp-multibyte-patch"
+        - name: Install WordPress plugins
+          command: ~/bin/wp plugin install {{ item.name }} {{ '--activate' if item.activate|default(false) else '' }} {{ '--version=' + item.version if item.version|default(None) else '' }}
+          args:
+            chdir: ~/www
+            creates: "~/www/wp-content/plugins/{{ item.name }}"
+          with_items: "{{ wordpress.plugins }}"
+        - name: Install WordPress themes
+          command: ~/bin/wp theme install {{ item.name }} {{ '--activate' if item.activate|default(false) else '' }} {{ '--version=' + item.version if item.version|default(None) else '' }}
+          args:
+            chdir: ~/www
+            creates: "{{ apache_vhosts[0].document_root }}/wp-content/themes/{{ item.name }}"
+          with_items: "{{ wordpress.themes }}"
+        - name: Import WordPress data
+          block:
+            - name: Install wordpress-importer plugin
+              command: ~/bin/wp plugin install wordpress-importer --activate
+              args:
+                chdir: ~/www
+            - name: Download import data
+              get_url:
+                url: "{{ wordpress.import.file }}"
+                dest: ~/tmp/worepress_import_data.xml
+              when: wordpress.import.file.startswith('http://') or wordpress.import.file.startswith('https://')
+            - name: Upload import data
+              copy:
+                src: "{{ wordpress.import.file }}"
+                dest: ~/tmp/worepress_import_data.xml
+              when: not wordpress.import.file.startswith('http://') and not wordpress.import.file.startswith('https://')
+            - name: Upload user mapping file
+              copy:
+                src: "{{ wordpress.import.file }}"
+                dest: ~/tmp/worepress_user_mapping.csv
+              when: not wordpress.import.authors in ['create', 'skip']
+            - name: Import data
+              command: ~/bin/wp import ~/tmp/worepress_import_data.xml --authors={{ wordpress.import.authors if wordpress.import.authors in ['create', 'skip'] else '~/tmp/worepress_user_mapping.csv'  }}
+              args:
+                chdir: ~/www
+          when: wordpress.import is defined
+        - name: Change permission for uploads directory
+          file:
+            path: ~/www/wp-content/uploads
+            state: directory
+            recurse: yes
+            mode: "0707"
+      tags: wordpress
     - name: Create MySQL connection setting file
       ini_file:
         path: ~/.my.cnf
@@ -183,3 +226,4 @@
           value: "{{ wordpress.db_password }}"
         - option: default-character-set
           value: utf8
+      tags: mysql

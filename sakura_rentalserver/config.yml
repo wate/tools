@@ -95,3 +95,15 @@ authorized_keys:
   #   state: yes (optional)
   # - key: "{{ lookup('file', '~/.ssh/removed.pub') }}"
   #   state: no (optional)
+
+usacloud:
+  install: yes
+  version: "0.11.0"
+  # Setting SakuraCloud API Token
+  token: "{{ lookup('env', 'SAKURACLOUD_ACCESS_TOKEN') }}"
+  # Setting SakuraCloud API Secret
+  secret: "{{ lookup('env', 'SAKURACLOUD_ACCESS_TOKEN_SECRET') }}"
+  # Setting SakuraCloud Zone: is1a / is1b / tk1a / tk1v
+  zone: "{{ lookup('env', 'SAKURACLOUD_ZONE') }}"
+  # Setting Default Output Type: table / json / csv / tsv
+  output_type: table
