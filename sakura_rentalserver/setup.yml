@@ -169,9 +169,11 @@
       with_items:
         - option: host
           value: "{{ wordpress.db_host }}"
-        - option: name
+        - option: database
           value: "{{ wordpress.db_name }}"
         - option: user
           value: "{{ wordpress.db_user }}"
         - option: password
           value: "{{ wordpress.db_password }}"
+        - option: default-character-set
+          value: utf8
