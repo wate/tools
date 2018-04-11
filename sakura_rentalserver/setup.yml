@@ -224,6 +224,13 @@
             mode: "0700"
           with_fileglob:
             - "{{ playbook_dir }}/scripts/*.sh"
+        - name: set Cron variables
+          cronvar:
+            name: "{{ item.name }}"
+            value: "{{ item.value }}"
+          with_items:
+            - name: PATH
+              value: "/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin:/home/{{ ansible_user }}/bin"
         - name: Set WordPress backup job
           cron:
             name: "WordPress backup job"
