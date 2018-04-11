@@ -18,8 +18,8 @@ php_ini:
 
 wordpress:
   ## ダウンロードするWordPressの設定
-  # version: latest
-  # locale: ja
+  version: latest
+  locale: ja
   ## インストールの設定
   url: "{{ ansible_user }}.sakura.ne.jp"
   title: サンプルサイト
