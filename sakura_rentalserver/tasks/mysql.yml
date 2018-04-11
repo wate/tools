@@ -1,0 +1,19 @@
+- name: Create MySQL connection setting file
+  ini_file:
+    path: ~/.my.cnf
+    section: client
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    mode: "0600"
+    create: yes
+  with_items:
+    - option: host
+      value: "{{ wordpress.db_host }}"
+    - option: database
+      value: "{{ wordpress.db_name }}"
+    - option: user
+      value: "{{ wordpress.db_user }}"
+    - option: password
+      value: "{{ wordpress.db_password }}"
+    - option: default-character-set
+      value: utf8
