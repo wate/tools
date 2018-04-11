@@ -1,7 +1,7 @@
-## 利用するPHPのバージョン
+## 利用するPHPのバージョン(default / 7.1 / 5.6 など)
 php_version: default
-## Imagickモジュールを利用するか否か
-php_use_imageck: yes
+## Imagickモジュールを利用するか否か(true / false)
+php_use_imageck: true
 ## php.iniの設定
 php_ini:
   default_charset: UTF-8
@@ -54,61 +54,60 @@ wordpress:
   plugins:
     # Autoptimizeプラグイン
     - name: autoptimize
-      activate: yes
+      activate: true
     # Disable Google Fontsプラグイン
     - name: disable-google-fonts
-      activate: yes
+      activate: true
     # ImageMagick Engineプラグイン
     - name: imagemagick-engine
-      activate: yes
+      activate: true
     # Remove query strings from resourcesプラグイン
     - name: remove-query-strings-from-static-resources
-      activate: yes
+      activate: true
     # Protect Uploadsプラグイン
     - name: protect-uploads
-      activate: yes
+      activate: true
     # All In One WP Security & Firewallプラグイン
     - name: all-in-one-wp-security-and-firewall
-      activate: yes
+      activate: true
     # TypeSquare Webfonts SAKURA for SAKURA Rental Serverプラグイン
     - name: ts-webfonts-for-sakura
-      activate: yes
+      activate: true
     # さくらのレンタルサーバ 簡単SSL化プラグイン
     - name: sakura-rs-wp-ssl
     # - name: some-plugin-name
-    #   activate: yes (optional)
+    #   activate: true (optional)
     #   version: 1.2.3 (optional)
   ## インストールするテーマの設定
   themes: []
     # - name: some-theme-name
     #   version: 1.2.3 (optional)
-    #   active: yes (optional)
+    #   active: true (optional)
   ## インポートするデータの設定
   # import:
   #   file: https://raw.githubusercontent.com/jawordpressorg/theme-test-data-ja/master/wordpress-theme-test-date-ja.xml
   #   authors: create
 
 wordpress_backup_job:
-  enabled: yes
+  enabled: true
   hour: "{{ 6 | random(seed=inventory_hostname) }}"
   minute: "{{ 59 | random(seed=inventory_hostname) }}"
 
 wordpress_update_job:
-  enabled: no
+  enabled: false
   hour: "{{ 7 | random(seed=inventory_hostname, start=1) }}"
   minute: "{{ 59 | random(seed=inventory_hostname) }}"
 
-## SSH用公開鍵の設定
-authorized_keys:
-  - key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
-  # - key: "{{ lookup('file', '~/.ssh/user1.pub') }}"
-  #   state: yes (optional)
+## SSHの公開鍵の設定
+authorized_keys: []
+  # - key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+  #   state: true (optional)
   # - key: "{{ lookup('file', '~/.ssh/removed.pub') }}"
-  #   state: no (optional)
+  #   state: false (optional)
 
 usacloud:
-  # usacloudをインストールするか否か
-  install: yes
+  # usacloudをインストールするか否か(true / false)
+  install: true
   # usacloudのバージョン
   version: "0.11.0"
   # さくらのクラウド APIキー(アクセストークン)
