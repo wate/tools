@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 LIFELIMIT_PAR_DAY=3
-BACKUP_DIR=~/backup
+BACKUP_DIR=${HOME}/backup
 BACKUP_DATE=$(date +"%Y%m%d")
 BACKUP_TIME=$(date +"%H%M%S")
 BACKUP_DATETIME="${BACKUP_DATE}_${BACKUP_TIME}"
@@ -17,7 +17,7 @@ cd ${BACKUP_DIR} || exit 1;
 # echo "# ---------------------------"
 # echo "# Backup old backup files(Server => Object Strage)"
 # echo "# ---------------------------"
-# find *.tar.gz -mtime +${LIFELIMIT_PAR_DAY} -exec ~/bin/usacloud object-storage put -y {} {} \;
+# find *.tar.gz -mtime +${LIFELIMIT_PAR_DAY} -exec ${HOME}/bin/usacloud object-storage put -y {} {} \;
 
 echo "# ---------------------------"
 echo "# Cleanup old backup files"
@@ -25,13 +25,13 @@ echo "# ---------------------------"
 find *.tar.gz -mtime +${LIFELIMIT_PAR_DAY} -exec ls -l {} \;
 find *.tar.gz -mtime +${LIFELIMIT_PAR_DAY} -exec rm {} \;
 
-cd ~/www || exit 1;
+cd ${HOME}/www || exit 1;
 echo "# ---------------------------"
 echo "# Export WordPress database"
 echo "# ---------------------------"
-~/bin/wp db export ${BACKUP_DIR}/wp_backup_${BACKUP_DATETIME}_database.sql
+${HOME}/bin/wp db export ${BACKUP_DIR}/wp_backup_${BACKUP_DATETIME}_database.sql
 
-cd ~/www/wp-content || exit 1;
+cd ${HOME}/www/wp-content || exit 1;
 
 echo "# ---------------------------"
 echo "# Create archive uploads directory"

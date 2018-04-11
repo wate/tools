@@ -16,9 +16,9 @@ PLUGIN_UPDATE_ONLY_MINOR='n'
 # 有効化されているテーマのみを更新対象にするか否か(y/n)
 THEME_UPDATE_ONLY_ACTIVED='n'
 
-cd ~/www || exit 1;
+cd ${HOME}/www || exit 1;
 
-if ! ~/bin/wp core is-installed &>/dev/null ; then
+if ! ${HOME}/bin/wp core is-installed &>/dev/null ; then
     echo "WordPress not installed"
     exit 0;
 fi
@@ -27,7 +27,7 @@ CORE_UPDATE_PARAM=''
 if [ "${CORE_UPDATE_ONLY_MINOR}" == 'y' ]; then
     CORE_UPDATE_PARAM='--minor'
 fi
-CORE_UPDATE_CHECK_RESULT=$(~/bin/wp core check-update ${CORE_UPDATE_PARAM})
+CORE_UPDATE_CHECK_RESULT=$(${HOME}/bin/wp core check-update ${CORE_UPDATE_PARAM})
 echo '# -----------------------'
 echo '# Core Update Status'
 echo '# -----------------------'
@@ -35,7 +35,7 @@ echo "wp core check-update ${CORE_UPDATE_PARAM}"
 echo ${CORE_UPDATE_CHECK_RESULT}
 
 if [[ -n $(echo ${CORE_UPDATE_CHECK_RESULT} | tail -n +2) ]]; then
-    ~/bin/wp core update ${CORE_UPDATE_PARAM}
+    ${HOME}/bin/wp core update ${CORE_UPDATE_PARAM}
 fi
 
 PLUGIN_UPDATE_CHECK_PARAM=''
@@ -47,7 +47,7 @@ echo '# Plugin Update Status'
 echo '# -----------------------'
 echo "wp plugin list --update=available"
 
-~/bin/wp plugin list --update=available
+${HOME}/bin/wp plugin list --update=available
 
 PLUGIN_UPDATE_OPTION=''
 if [ "${PLUGIN_UPDATE_ONLY_PATCH}" == 'y' ]; then
@@ -57,8 +57,8 @@ else
       PLUGIN_UPDATE_OPTION='--minor'
   fi
 fi
-for PLUGIN_NAME in $(~/bin/wp plugin list --update=available --field=name ${PLUGIN_UPDATE_CHECK_PARAM}); do
-    ~/bin/wp plugin update ${PLUGIN_NAME} ${PLUGIN_UPDATE_OPTION}
+for PLUGIN_NAME in $(${HOME}/bin/wp plugin list --update=available --field=name ${PLUGIN_UPDATE_CHECK_PARAM}); do
+    ${HOME}/bin/wp plugin update ${PLUGIN_NAME} ${PLUGIN_UPDATE_OPTION}
 done
 
 THEME_UPDATE_CHECK_PARAM=''
@@ -69,8 +69,8 @@ echo '# -----------------------'
 echo '# Theme Update Status'
 echo '# -----------------------'
 echo "wp theme list --update=available ${THEME_UPDATE_CHECK_PARAM}"
-~/bin/wp theme list --update=available ${THEME_UPDATE_CHECK_PARAM}
+${HOME}/bin/wp theme list --update=available ${THEME_UPDATE_CHECK_PARAM}
 
-for THEME_NAME in $(~/bin/wp theme list --update=available --field=name ${THEME_UPDATE_CHECK_PARAM}); do
-    ~/bin/wp theme update ${THEME_NAME}
+for THEME_NAME in $(${HOME}/bin/wp theme list --update=available --field=name ${THEME_UPDATE_CHECK_PARAM}); do
+    ${HOME}/bin/wp theme update ${THEME_NAME}
 done
