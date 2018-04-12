@@ -37,7 +37,7 @@ ansible-playbook setup.yml
 事前準備
 -------------------
 
-このツールを利用するための事前準備は以下の通りです
+このツールを利用するための事前準備は以下の通りです。
 
 * コントロールパネルにログインし、  
   WordPress用のデータベースを作成しておく必要があります。
@@ -62,7 +62,7 @@ hosts.ymlの「example.sakura.ne.jp」の部分を、
 
 ##### 例：初期ドメインが「hoge.sakura.ne.jp」の場合
 
-変更前
+[変更前]
 ```yml
 sakura_rental_servers:
   hosts:
@@ -75,7 +75,7 @@ sakura_rental_servers:
     ansible_python_interpreter: /usr/local/bin/python
 ```
 
-変更後
+[変更後]
 ```yml
 sakura_rental_servers:
   hosts:
@@ -100,7 +100,7 @@ sakura_rental_servers:
 
 ##### 例：ホスト名が「www1234.sakura.ne.jp」の場合
 
-変更前
+[変更前]
 ```yml
 sakura_rental_servers:
   hosts:
@@ -113,7 +113,7 @@ sakura_rental_servers:
     ansible_python_interpreter: /usr/local/bin/python
 ```
 
-変更後
+[変更後]
 ```yml
 sakura_rental_servers:
   hosts:
@@ -133,7 +133,7 @@ sakura_rental_servers:
 
 ##### 例：「FTPアカウント」が「hoge」の場合
 
-変更前
+[変更前]
 ```yml
 sakura_rental_servers:
   hosts:
@@ -146,7 +146,7 @@ sakura_rental_servers:
     ansible_python_interpreter: /usr/local/bin/python
 ```
 
-変更後
+[変更後]
 ```yml
 sakura_rental_servers:
   hosts:
@@ -169,7 +169,7 @@ sakura_rental_servers:
 
 ##### 例：「サーバパスワード」が「str0ngp@55w0rd」の場合
 
-変更前
+[変更前]
 ```yml
 sakura_rental_servers:
   hosts:
@@ -182,7 +182,7 @@ sakura_rental_servers:
     ansible_python_interpreter: /usr/local/bin/python
 ```
 
-変更後
+[変更後]
 ```yml
 sakura_rental_servers:
   hosts:
@@ -258,11 +258,11 @@ php_ini:
 * `rewrite_structure`：パーマリンク設定の内容を設定します
 * `extra_setting`：その他、wp-config.phpに記載するWordPressの設定内容を設定します
 * `htaccess`：アクセスコントロールファイル(.htaccess)に記載する内容を設定します
-* `plugins`：WordPressのインストール時に同時にインストールするプラグインを設定します
+* `plugins`：WordPressのインストールと同時にインストールするプラグインを設定します
     * 初期設定では以下のURLに記載されている  
       「インストール済みのプラグイン」の内容が設定されています
       * [【クイックインストール】さくらのレンタルサーバ版WordPressの特長](https://help.sakura.ad.jp/hc/ja/articles/206056602--%E3%82%AF%E3%82%A4%E3%83%83%E3%82%AF%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB-%E3%81%95%E3%81%8F%E3%82%89%E3%81%AE%E3%83%AC%E3%83%B3%E3%82%BF%E3%83%AB%E3%82%B5%E3%83%BC%E3%83%90%E7%89%88WordPress%E3%81%AE%E7%89%B9%E9%95%B7)
-* `themes`：WordPressのインストール時に同時にインストールするプラグインを設定します
+* `themes`：WordPressのインストールと同時にインストールするプラグインを設定します
     * 初期設定では未設定の状態になっています
 * `import`：WordPressにインポートするデータを設定します
     * 初期設定ではコメントアウトにより無効化されています
@@ -429,7 +429,7 @@ wordpress_update_job:
 
 **サンプル**
 
-※以下のサンプルは、Ansibleを実行するPCに設定されているusacloud用の環境変数と同じものを設定するように記載されています
+※以下のサンプルは、Ansibleを実行するPCに設定されているusacloud用の環境変数と同じものを設定するように記載されています。
 
 ```yml
 usacloud:
@@ -459,7 +459,7 @@ usacloud:
 
 **サンプル**
 
-※以下のサンプルは、Ansibleを実行するPCに保存されている公開鍵のパスを指定するように記載されています
+※以下のサンプルは、Ansibleを実行するPCに保存されている公開鍵のパスを指定するように記載されています。
 
 ```yml
 authorized_keys:
