@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # リンクチェック対象のURL(ここを変更してね)
-CHECK_URL="https://histudy.jp/"
+CHECK_URL="http://example.com/"
 
 apt-get update
 apt-get upgrade -y
