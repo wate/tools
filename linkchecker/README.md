@@ -45,7 +45,7 @@ CHECK_URL="https://www.example.net/"
 linkchecker.ini設定内容を変更することにより、  
 リンクチェック時のログの出力内容などを変更することができます。
 
-設定方法の詳細は以下のURLを参照してください。
+設定方法の詳細は以下のURLを参照してください。  
 https://wummel.github.io/linkchecker/man5/linkcheckerrc.5.html
 
 
