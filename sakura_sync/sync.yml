@@ -1,0 +1,158 @@
+- name: Sakura Rental Server Sync tool(common)
+  hosts: sync_hosts
+  become: no
+  gather_facts: no
+  tasks:
+    - name: Create user directories
+      file:
+        path: "~/{{ item }}"
+        state: directory
+      with_items:
+        - bin
+        - tmp
+        - backup
+    - name: Install wp-cli
+      get_url:
+        url: https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+        dest: ~/bin/wp
+        mode: "0700"
+    - name: Create wp-cli user config directory
+      file:
+        path: ~/.wp-cli
+        state: directory
+    - name: Create SSH config directory
+      file:
+        path: ~/.ssh
+        state: directory
+        mode: 0700
+    - name: Create SSH config file
+      copy:
+        dest: ~/.ssh/config
+        content: |
+          Host from
+            HostName {{ hostvars.from.ansible_host }}
+            User {{ hostvars.from.ansible_user }}
+            IdentityFile ~/.ssh/_sync
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+          Host to
+            HostName {{ hostvars.to.ansible_host }}
+            User {{ hostvars.to.ansible_user }}
+            IdentityFile ~/.ssh/_sync
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+        mode: 0600
+    - name: Copy private key file
+      copy:
+        src: "{{ ssh_private_key }}"
+        dest: ~/.ssh/_sync
+        mode: 0600
+    - name: Set authorized key
+      authorized_key:
+        user: "{{ ansible_user }}"
+        key: "{{ lookup('file', ssh_public_key) }}"
+
+- name: Sakura Rental Server Sync tool(from)
+  hosts: from
+  become: no
+  gather_facts: no
+  tasks:
+    - name: Check WordPress is installed
+      command: ~/bin/wp core is-installed
+      args:
+        chdir: ~/www
+      ignore_errors: yes
+      changed_when: no
+      register: result
+    - block:
+        - name: Export WordPress Database
+          command: ~/bin/wp db export ~/backup/wp_database_dump.sql
+          args:
+            chdir: ~/www
+      when: result.rc == 0
+    - name:  Synchronization document root directory
+      command: scp -r ~/www to:~/
+      args:
+        removes: ~/www
+    - name: Synchronization Database dump file
+      command: scp ~/backup/wp_database_dump.sql to:~/backup/wp_database_dump.sql
+      args:
+        removes: ~/backup/wp_database_dump.sql
+
+- name: Sakura Rental Server Sync tool(to)
+  hosts: to
+  become: no
+  gather_facts: no
+  tasks:
+    - name: Check WordPress is installed
+      command: ~/bin/wp core is-installed
+      args:
+        chdir: ~/www
+      ignore_errors: yes
+      changed_when: no
+      register: result
+    - block:
+        - name: Replace Database setting(DB_HOST)
+          lineinfile:
+            path: "~/www/wp-config.php"
+            regexp: "^define\\(\\s*'DB_HOST'\\s*,"
+            line: "define( 'DB_HOST', '{{ wordpress.db_host }}' );"
+        - name: Replace Database setting(DB_NAME)
+          lineinfile:
+            path: "~/www/wp-config.php"
+            regexp: "^define\\(\\s*'DB_NAME'\\s*,"
+            line: "define( 'DB_NAME', '{{ wordpress.db_name }}' );"
+        - name: Replace Database setting(DB_USER)
+          lineinfile:
+            path: "~/www/wp-config.php"
+            regexp: "^define\\(\\s*'DB_USER'\\s*,"
+            line: "define( 'DB_USER', '{{ wordpress.db_user }}' );"
+        - name: Replace Database setting(DB_PASSWORD)
+          lineinfile:
+            path: "~/www/wp-config.php"
+            regexp: "^define\\(\\s*'DB_PASSWORD'\\s*,"
+            line: "define( 'DB_PASSWORD', '{{ wordpress.db_password }}' );"
+        - name: Replace Database setting(DB_CHARSET)
+          lineinfile:
+            path: "~/www/wp-config.php"
+            regexp: "^define\\(\\s*'DB_CHARSET'\\s*,"
+            line: "define( 'DB_CHARSET', '{{ wordpress.db_charset }}' );"
+        - name: Add WordPress Extra setting Andible management block delimer(start)
+          lineinfile:
+            path: "~/www/wp-config.php"
+            regexp: "\\/\\/ BEGIN ANSIBLE MANAGED BLOCK"
+            line: "// BEGIN ANSIBLE MANAGED BLOCK"
+            insertafter: "\\$table_prefix ="
+        - name: Add WordPress Extra setting Andible management block delimer(end)
+          lineinfile:
+            path: "~/www/wp-config.php"
+            regexp: "\\/\\/ END ANSIBLE MANAGED BLOCK"
+            line: "// END ANSIBLE MANAGED BLOCK"
+            insertafter: "\\/\\/ BEGIN ANSIBLE MANAGED BLOCK"
+        - name: Change permission for uploads directory
+          file:
+            path: ~/www/wp-content/uploads
+            state: directory
+            recurse: yes
+            mode: "0707"
+        - name: Import WordPress Database
+          command: ~/bin/wp db import ~/backup/wp_database_dump.sql
+          args:
+            chdir: ~/www
+            removes: ~/backup/wp_database_dump.sql
+        - name: update siteurl
+          command: ~/bin/wp option update siteurl "{{ wordpress.siteurl }}"
+          args:
+            chdir: ~/www
+          when: wordpress.siteurl is defined
+        - name: update home
+          command: ~/bin/wp option update home "{{ wordpress.home }}"
+          args:
+            chdir: ~/www
+          when: wordpress.home is defined
+        - name: Replace WordPress Data
+          command: ~/bin/wp search-replace '{{ item.search|replace("'", "\\'") }}' '{{ item.replace|replace("'", "\\'") }}'
+          args:
+            chdir: ~/www
+          with_items: "{{ wordpress.replaces }}"
+      when: result.rc == 0
