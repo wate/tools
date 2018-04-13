@@ -17,7 +17,7 @@
 
 ```
 cd <このファイルがあるディレクトリのパス>
-ansible-playbook sync.yml
+ansible-playbook migrate.yml
 ```
 
 事前準備
