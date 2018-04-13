@@ -85,6 +85,7 @@
         - .shrc
         - .php.version
         - .my.version
+        - .cpanelrc
     - name: Synchronization SpamAssassin Learning data
       command: scp -r -p ~/.spamassassin to:~/
       args:
