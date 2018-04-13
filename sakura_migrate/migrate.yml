@@ -64,18 +64,38 @@
       ignore_errors: yes
       changed_when: no
       register: result
-    - block:
-        - name: Export WordPress Database
-          command: ~/bin/wp db export ~/backup/wp_database_dump.sql
-          args:
-            chdir: ~/www
+    - name: Export WordPress Database
+      command: ~/bin/wp db export ~/backup/wp_database_dump.sql
+      args:
+        chdir: ~/www
       when: result.rc == 0
-    - name:  Synchronization document root directory
-      command: scp -r ~/www to:~/
+    - name: Synchronization document root directory
+      command: scp -r -p ~/www to:~/
       args:
         removes: ~/www
+    - name: Synchronization dot files
+      command: scp -p ~/{{ item }} to:~/{{ item }}
+      args:
+        removes: ~/{{ item }}
+      with_items:
+        - .cshrc
+        - .login
+        - .login_conf
+        - .profile
+        - .shrc
+        - .php.version
+        - .my.version
+    - name: Synchronization SpamAssassin Learning data
+      command: scp -r -p ~/.spamassassin to:~/
+      args:
+        removes: ~/.spamassassin
+    - name: Synchronization MailBox
+      command: scp -r -p ~/MailBox to:~/
+      ignore_errors: yes
+      args:
+        removes: ~/MailBox
     - name: Synchronization Database dump file
-      command: scp ~/backup/wp_database_dump.sql to:~/backup/wp_database_dump.sql
+      command: scp -p ~/backup/wp_database_dump.sql to:~/backup/wp_database_dump.sql
       args:
         removes: ~/backup/wp_database_dump.sql
 
@@ -140,12 +160,12 @@
           args:
             chdir: ~/www
             removes: ~/backup/wp_database_dump.sql
-        - name: update siteurl
+        - name: Update WordPress 'siteurl' option
           command: ~/bin/wp option update siteurl "{{ wordpress.siteurl }}"
           args:
             chdir: ~/www
           when: wordpress.siteurl is defined
-        - name: update home
+        - name: Update WordPress 'home' option
           command: ~/bin/wp option update home "{{ wordpress.home }}"
           args:
             chdir: ~/www
