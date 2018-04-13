@@ -9,7 +9,7 @@
 
 このツールを利用するには以下のものがインストールされている必要があります。
 
-* [Ansible][ansible]
+* [Ansible](https://www.ansible.com/)
     * ※バージョン 2.4以上
 
 利用方法
