@@ -94,7 +94,7 @@ wordpress_backup_job:
   minute: "{{ 59 | random(seed=inventory_hostname) }}"
 
 wordpress_update_job:
-  enabled: false
+  enabled: true
   hour: "{{ 7 | random(seed=inventory_hostname, start=1) }}"
   minute: "{{ 59 | random(seed=inventory_hostname) }}"
 
