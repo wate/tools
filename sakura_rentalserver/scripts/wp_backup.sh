@@ -6,9 +6,7 @@ BACKUP_DATE=$(date +"%Y%m%d")
 BACKUP_TIME=$(date +"%H%M%S")
 BACKUP_DATETIME="${BACKUP_DATE}_${BACKUP_TIME}"
 
-if [ ! -e "${BACKUP_DIR}" ]; then
-    mkdir -p ${BACKUP_DIR}
-fi
+mkdir -p ${BACKUP_DIR}
 
 cd ${BACKUP_DIR} || exit 1;
 
