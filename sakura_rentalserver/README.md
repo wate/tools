@@ -54,42 +54,21 @@ ansible-playbook setup.yml
 
 ### hosts.yml
 
-#### example.sakura.ne.jp
+以下の内容を変更します。
 
-初期ドメインの内容を設定します。  
-hosts.ymlの「example.sakura.ne.jp」の部分を、  
+* 初期ドメイン
+* ホスト名
+* FTPアカウント
+* サーバパスワード
+
+#### 初期ドメイン
+
+hosts.ymlの「`<ここに初期ドメインを設定します>`」の部分を、  
 さくらのレンタルサーバーの「初期ドメイン」の内容に書き換えます。
 
-##### 例：初期ドメインが「hoge.sakura.ne.jp」の場合
+#### ホスト名
 
-[変更前]
-```yml
-sakura_rental_servers:
-  hosts:
-    "example.sakura.ne.jp":
-      ansible_host: wwwXXXXXX.sakura.ne.jp
-      ansible_user: example
-      ansible_ssh_pass: ex@mple_user_p@55w0rd
-      ansible_connection: paramiko
-  vars:
-    ansible_python_interpreter: /usr/local/bin/python
-```
-
-[変更後]
-```yml
-sakura_rental_servers:
-  hosts:
-    "hoge.sakura.ne.jp":
-      ansible_host: wwwXXXXXX.sakura.ne.jp
-      ansible_user: example
-      ansible_ssh_pass: ex@mple_user_p@55w0rd
-      ansible_connection: paramiko
-  vars:
-    ansible_python_interpreter: /usr/local/bin/python
-```
-
-#### ansible_host
-
+hosts.ymlの「`<ここにホスト名を設定します>`」の部分を、  
 さくらのレンタルサーバーの接続先ホスト名を設定します。  
 設定する内容は以下の手順で確認することができます。
 
@@ -98,88 +77,33 @@ sakura_rental_servers:
 3. 「サーバに関する情報」のリンクをクリックします。
 4. 「\* サーバに関する情報\* 」の「ホスト名」の内容を設定します。
 
-##### 例：ホスト名が「www1234.sakura.ne.jp」の場合
+#### FTPアカウント
 
-[変更前]
-```yml
-sakura_rental_servers:
-  hosts:
-    "hoge.sakura.ne.jp":
-      ansible_host: wwwXXXXXX.sakura.ne.jp
-      ansible_user: example
-      ansible_ssh_pass: ex@mple_user_p@55w0rd
-      ansible_connection: paramiko
-  vars:
-    ansible_python_interpreter: /usr/local/bin/python
-```
+hosts.ymlの「`<ここにFTPアカウントを設定します>`」の部分を、  
+「仮登録完了のお知らせ」メールに記載されている「FTPアカウント」の内容を設定します。
 
-[変更後]
-```yml
-sakura_rental_servers:
-  hosts:
-    "hoge.sakura.ne.jp":
-      ansible_host: www1234.sakura.ne.jp
-      ansible_user: example
-      ansible_ssh_pass: ex@mple_user_p@55w0rd
-      ansible_connection: paramiko
-  vars:
-    ansible_python_interpreter: /usr/local/bin/python
-```
+#### サーバパスワード
 
-#### ansible_user
-
-「仮登録完了のお知らせ」メールに記載されている  
-「FTPアカウント」の内容を設定します。
-
-##### 例：「FTPアカウント」が「hoge」の場合
-
-[変更前]
-```yml
-sakura_rental_servers:
-  hosts:
-    "hoge.sakura.ne.jp":
-      ansible_host: www1234.sakura.ne.jp
-      ansible_user: example
-      ansible_ssh_pass: ex@mple_user_p@55w0rd
-      ansible_connection: paramiko
-  vars:
-    ansible_python_interpreter: /usr/local/bin/python
-```
-
-[変更後]
-```yml
-sakura_rental_servers:
-  hosts:
-    "hoge.sakura.ne.jp":
-      ansible_host: www1234.sakura.ne.jp
-      ansible_user: hoge
-      ansible_ssh_pass: ex@mple_user_p@55w0rd
-      ansible_connection: paramiko
-  vars:
-    ansible_python_interpreter: /usr/local/bin/python
-```
-
-#### ansible_ssh_pass
-
-「仮登録完了のお知らせ」メールに記載されている  
-「サーバパスワード」の内容を設定します。
+hosts.ymlの「`<ここにサーバパスワードを設定します>`」の部分を、  
+「仮登録完了のお知らせ」メールに記載されている「サーバパスワード」の内容を設定します。
 
 ※コントロールパネルより「サーバパスワード」を変更されている場合は、  
-変更したの「サーバパスワード」の内容を設定してください。
+変更した後の「サーバパスワード」の内容を設定してください。
 
-##### 例：「サーバパスワード」が「str0ngp@55w0rd」の場合
+#### 設定例
 
 [変更前]
 ```yml
 sakura_rental_servers:
   hosts:
-    "hoge.sakura.ne.jp":
-      ansible_host: www1234.sakura.ne.jp
-      ansible_user: hoge
-      ansible_ssh_pass: ex@mple_user_p@55w0rd
+    "<ここに初期ドメインを設定します>":
+      ansible_host: "<ここにホスト名を設定します>"
+      ansible_user: "<ここにFTPアカウントを設定します>"
+      ansible_ssh_pass: "<ここにサーバパスワードを設定します>"
       ansible_connection: paramiko
   vars:
     ansible_python_interpreter: /usr/local/bin/python
+
 ```
 
 [変更後]
