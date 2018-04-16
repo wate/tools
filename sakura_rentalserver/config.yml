@@ -1,5 +1,5 @@
 ## 利用するPHPのバージョン(default / 7.1 / 5.6 など)
-php_version: default
+php_version: "default"
 ## Imagickモジュールを利用するか否か(true / false)
 php_use_imageck: true
 ## php.iniの設定
@@ -22,19 +22,19 @@ wordpress:
   locale: ja
   ## インストールの設定
   url: "{{ ansible_user }}.sakura.ne.jp"
-  title: サンプルサイト
-  admin_user: supervisor
-  admin_password: str0ngp@55w0rd
-  admin_email: info@example.com
+  title: "サンプルサイト"
+  admin_user: "supervisor"
+  admin_password: "str0ngp@55w0rd"
+  admin_email: "info@example.com"
   ## データベースの設定
-  db_host: mysqlXXX.db.sakura.ne.jp
+  db_host: "mysqlXXX.db.sakura.ne.jp"
   db_name: "{{ ansible_user }}_wordpress"
   db_user: "{{ ansible_user }}"
-  db_password: vErY_VeRy_Str0ng_P@55w0rd
-  db_prefix: wp_
-  db_charset: utf8mb4
+  db_password: "vErY_VeRy_Str0ng_P@55w0rd"
+  db_prefix: "wp_"
+  db_charset: "utf8mb4"
   ## パーマリンクの設定
-  rewrite_structure: /%category%/%postname%/
+  rewrite_structure: "/%category%/%postname%/"
   extra_setting: |
     define('WP_DEBUG', false);
     define('WP_DEBUG_DISPLAY', false);
@@ -119,6 +119,6 @@ usacloud:
   # デフォルトの出力形式: table / json / csv / tsv
   output_type: table
   # オブジェクトストレージ アクセスキー(アクセスキーID)
-  ojs_access_key_id: "{{ lookup('env', 'SACLOUD_OJS_ACCESS_KEY_ID') }}"
+  # ojs_access_key_id: "{{ lookup('env', 'SACLOUD_OJS_ACCESS_KEY_ID') }}"
   # オブジェクトストレージ アクセスキー(シークレットアクセスキー)
-  ojs_secret_access_key: "{{ lookup('env', 'SACLOUD_OJS_SECRET_ACCESS_KEY') }}"
+  # ojs_secret_access_key: "{{ lookup('env', 'SACLOUD_OJS_SECRET_ACCESS_KEY') }}"

@@ -31,14 +31,16 @@
       copy:
         content: "{{ usacloud_default_config | to_nice_json }}"
         dest: ~/.usacloud/default/config.json
-    - name: Set environment variables
+    - name: Set environment variables(SACLOUD_OJS_ACCESS_KEY_ID)
       lineinfile:
         path: ~/.cshrc
-        regexp: "setenv\\s+{{ item.name }}\\s+"
-        line: "setenv {{ item.name }} \"{{ item.value }}\""
-      with_items:
-        - name: SACLOUD_OJS_ACCESS_KEY_ID
-          value: "{{ usacloud.ojs_access_key_id }}"
-        - name: SACLOUD_OJS_SECRET_ACCESS_KEY
-          value: "{{ usacloud.ojs_secret_access_key }}"
+        regexp: "setenv\\s+SACLOUD_OJS_ACCESS_KEY_ID\\s+"
+        line: "setenv SACLOUD_OJS_ACCESS_KEY_ID \"{{ usacloud.ojs_access_key_id|default('') }}\""
+        state: "{{ 'present' if usacloud.ojs_access_key_id is defined else 'absent' }}"
+    - name: Set environment variables(SACLOUD_OJS_SECRET_ACCESS_KEY)
+      lineinfile:
+        path: ~/.cshrc
+        regexp: "setenv\\s+SACLOUD_OJS_SECRET_ACCESS_KEY\\s+"
+        line: "setenv SACLOUD_OJS_SECRET_ACCESS_KEY \"{{ usacloud.ojs_secret_access_key|default('') }}\""
+        state: "{{ 'present' if usacloud.ojs_secret_access_key is defined else 'absent' }}"
   when: usacloud.install
