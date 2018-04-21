@@ -84,6 +84,7 @@
         - .profile
         - .shrc
         - .php.version
+        - .php.module
         - .my.version
         - .cpanelrc
     - name: Synchronization SpamAssassin Learning data
