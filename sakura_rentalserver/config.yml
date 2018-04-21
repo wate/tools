@@ -1,5 +1,8 @@
 ## 利用するPHPのバージョン(default / 7.1 / 5.6 など)
 php_version: "default"
+## モジュール版のPHPを利用するか否か
+## (※PHPのバージョンが7未満を指定された場合はCGI版を利用するように自動的に設定が変更されます)
+php_module_mode: true
 ## Imagickモジュールを利用するか否か(true / false)
 php_use_imageck: true
 ## php.iniの設定

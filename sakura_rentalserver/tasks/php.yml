@@ -1,7 +1,21 @@
+- name: change PHP mode setting variable
+  set_fact:
+    php_module_mode: false
+  when: php_version != 'default' and php_version is version_compare('7', '<')
 - name: Set PHP version
   copy:
     content: "{{ php_version if php_version != 'default' else '' }}"
-    dest: ~/.php.version
+    dest: "~/{{ '.php.module' if php_module_mode else '.php.version' }}"
+- name: remove PHP Module mode version setting file
+  file:
+    path: ~/.php.module
+    state: absent
+  when: not php_module_mode
+- name: remove PHP CGI mode version setting file
+  file:
+    path: ~/.php.version
+    state: absent
+  when: php_module_mode
 - name: Enable or disable PHP imagick module
   ini_file:
     path: ~/www/php.ini
