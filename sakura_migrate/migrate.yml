@@ -29,15 +29,15 @@
       copy:
         dest: ~/.ssh/config
         content: |
-          Host from
-            HostName {{ hostvars.from.ansible_host }}
-            User {{ hostvars.from.ansible_user }}
+          Host old
+            HostName {{ hostvars.old.ansible_host }}
+            User {{ hostvars.old.ansible_user }}
             IdentityFile ~/.ssh/_sync
             StrictHostKeyChecking no
             UserKnownHostsFile /dev/null
-          Host to
-            HostName {{ hostvars.to.ansible_host }}
-            User {{ hostvars.to.ansible_user }}
+          Host new
+            HostName {{ hostvars.new.ansible_host }}
+            User {{ hostvars.new.ansible_user }}
             IdentityFile ~/.ssh/_sync
             StrictHostKeyChecking no
             UserKnownHostsFile /dev/null
@@ -52,8 +52,8 @@
         user: "{{ ansible_user }}"
         key: "{{ lookup('file', ssh_public_key) }}"
 
-- name: Sakura Rental Server Sync tool(from)
-  hosts: from
+- name: Sakura Rental Server Sync tool(old)
+  hosts: old
   become: no
   gather_facts: no
   tasks:
@@ -70,11 +70,11 @@
         chdir: ~/www
       when: result.rc == 0
     - name: Synchronization document root directory
-      command: scp -r -p ~/www to:~/
+      command: scp -r -p ~/www new:~/
       args:
         removes: ~/www
     - name: Synchronization dot files
-      command: scp -p ~/{{ item }} to:~/{{ item }}
+      command: scp -p ~/{{ item }} new:~/{{ item }}
       args:
         removes: ~/{{ item }}
       with_items:
@@ -87,21 +87,21 @@
         - .my.version
         - .cpanelrc
     - name: Synchronization SpamAssassin Learning data
-      command: scp -r -p ~/.spamassassin to:~/
+      command: scp -r -p ~/.spamassassin new:~/
       args:
         removes: ~/.spamassassin
     - name: Synchronization MailBox
-      command: scp -r -p ~/MailBox to:~/
+      command: scp -r -p ~/MailBox new:~/
       ignore_errors: yes
       args:
         removes: ~/MailBox
     - name: Synchronization Database dump file
-      command: scp -p ~/backup/wp_database_dump.sql to:~/backup/wp_database_dump.sql
+      command: scp -p ~/backup/wp_database_dump.sql new:~/backup/wp_database_dump.sql
       args:
         removes: ~/backup/wp_database_dump.sql
 
-- name: Sakura Rental Server Sync tool(to)
-  hosts: to
+- name: Sakura Rental Server Sync tool(new)
+  hosts: new
   become: no
   gather_facts: no
   tasks:
