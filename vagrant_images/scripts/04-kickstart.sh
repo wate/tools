@@ -189,7 +189,7 @@ grub2-mkconfig -o /etc/grub2.cfg
 # autofsck
 echo 'AUTOFSCK_DEF_CHECK=yes' >> /etc/sysconfig/autofsck
 
-# yum install -y gdisk
+yum install -y gdisk
 # sgdisk -t 3:8300 /dev/sda
 # gdisk -l /dev/sda
 
