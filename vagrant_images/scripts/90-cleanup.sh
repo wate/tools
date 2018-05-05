@@ -1,8 +1,8 @@
 #!/bin/sh -eux
 
 rm -rf VBoxGuestAdditions_*.iso VBoxGuestAdditions_*.iso.?;
-
-yum -y clean all
+yum remove -y wget
+yum clean all -y
 
 rm -f /etc/udev/rules.d/70-persistent-net.rules
 ln -s -f /dev/null /etc/udev/rules.d/70-persistent-net.rules
