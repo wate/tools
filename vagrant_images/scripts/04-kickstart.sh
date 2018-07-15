@@ -190,12 +190,15 @@ grub2-mkconfig -o /etc/grub2.cfg
 echo 'AUTOFSCK_DEF_CHECK=yes' >> /etc/sysconfig/autofsck
 
 yum install -y gdisk
-# sgdisk -t 3:8300 /dev/sda
-# gdisk -l /dev/sda
+# sgdisk -t 3:8300 /dev/vda
+# gdisk -l /dev/vda
 
 # yum update
 yum -y clean all
 yum -y update
+
+# root lock
+# usermod -p '' root
 
 # udev
 rm -f /etc/udev/rules.d/70-persistent-net.rules
