@@ -1,7 +1,7 @@
 - name: change PHP mode setting variable
   set_fact:
     php_module_mode: false
-  when: php_version != 'default' and php_version is version_compare('7', '<')
+  when: php_version != 'default' and php_version is version('7', '<')
 - name: Set PHP version
   copy:
     content: "{{ php_version if php_version != 'default' else '' }}"
@@ -23,6 +23,14 @@
     option: extension
     value: imagick.so
     state: "{{ 'present' if php_use_imageck else 'absent' }}"
+    create: yes
+- name: Enable or disable PHP apcu module
+  ini_file:
+    path: ~/www/php.ini
+    section: core
+    option: extension
+    value: apcu.so
+    state: "{{ 'present' if php_use_apcu else 'absent' }}"
     create: yes
 - name: Set PHP setting
   ini_file:
